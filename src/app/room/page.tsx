@@ -73,8 +73,8 @@ export default function Room() {
     <main className={styles.mainContainer}>
       <section className={styles.enterContainer}>
         <ul>
-          {p && Object.keys(p).map(i =>
-            <li className={styles.itemList}>
+          {p && Object.keys(p).map((i, index) =>
+            <li className={styles.itemList} key={index}>
               {i} {reveal ? <span style={{ marginLeft: 'auto' }}>{p[i]}</span> : p[i] === 0 ? <span style={{ marginLeft: 'auto' }}>-</span> : <div className={styles.secret}></div>}
             </li>
           )}
@@ -82,8 +82,9 @@ export default function Room() {
       </section>
 
       <section className={styles.cardsContainer}>
-        {fibo.map(num =>
+        {fibo.map((num, index) =>
           <div
+            key={index}
             className={num === selectedCard ? styles.activeCard : styles.cards}
             onClick={() => {
               vote(num)
