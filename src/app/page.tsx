@@ -1,95 +1,123 @@
-import Image from 'next/image'
+'use client'
+
+import { Dispatch, SetStateAction, useState } from 'react'
+import { TextField, Button } from '@mui/material'
 import styles from './page.module.css'
+import { db } from '@/firebase'
+import { set, ref, update } from "firebase/database";
+import { useRouter } from 'next/navigation';
+import { useRoomContext } from '@/contexts/RoomContext'
+
+interface ISectionOneProps {
+  setActiveSection: Function
+}
+
+function SectionOne({ setActiveSection }: ISectionOneProps) {
+  const { userName ,setUserName } = useRoomContext()
+
+  return (
+    <>
+      <h2>Mix Poker</h2>
+      <TextField
+        id="outlined-basic"
+        label="Digite seu nome"
+        variant="outlined"
+        onChange={e => setUserName(e.target.value)}
+        value={userName}
+      />
+      <Button
+        style={{ marginTop: '1rem', width: '13rem' }}
+        variant="contained"
+        onClick={() => setActiveSection('two')}
+      >
+        Prosseguir
+      </Button>
+    </>
+  )
+}
+
+interface ISectionTwoProps {
+  setIsCreate: Dispatch<SetStateAction<boolean>>
+  setActiveSection: Dispatch<SetStateAction<string>>
+}
+
+function SectionTwo({ setIsCreate, setActiveSection }: ISectionTwoProps) {
+  return (
+    <>
+      <h2>Mix Poker</h2>
+      <Button style={{ marginTop: '1rem', width: '13rem' }} variant="contained" onClick={() => {
+        setIsCreate(false)
+        setActiveSection('three')
+      }}>Entrar em uma sala</Button>
+      <Button style={{ marginTop: '1rem', width: '13rem' }} variant="contained" onClick={() => {
+        setIsCreate(true)
+        setActiveSection('three')
+      }}>Criar sala</Button>
+    </>
+  )
+}
+
+interface ISectionThreeProps {
+  isCreate: boolean
+}
+
+function SectionThree({ isCreate }: ISectionThreeProps) {
+  const { push } = useRouter();
+  const { roomName ,setRoomName, userName } = useRoomContext()
+
+  const createRoom = () => {
+    set(ref(db, 'rooms/' + roomName), {
+      participants: { [userName]: 0 }
+    });
+
+    push(`/room`)
+  }
+
+  const enterRoom = () => {
+    update(ref(db, 'rooms/' + roomName + '/participants'), {
+      [userName]: 0
+    });
+
+    push(`/room`, {
+
+    })
+  }
+
+  return (
+    <>
+      <h2>Mix Poker</h2>
+      <TextField
+        id="outlined-basic"
+        label="Digite o nome da sala"
+        variant="outlined"
+        onChange={e => setRoomName(e.target.value)}
+        value={roomName}
+      />
+      <Button style={{ marginTop: '1rem', width: '13rem' }} variant="contained" onClick={isCreate ? createRoom : enterRoom}>{isCreate ? 'Criar' : 'Entrar'}</Button>
+    </>
+  )
+}
+
+interface ISection {
+  [key: string]: JSX.Element
+}
 
 export default function Home() {
+  const [activeSection, setActiveSection] = useState('one')
+
+  const [isCreate, setIsCreate] = useState(false)
+
+  const sections: ISection = {
+    one: <SectionOne setActiveSection={setActiveSection} />,
+    two: <SectionTwo setIsCreate={setIsCreate} setActiveSection={setActiveSection}/>,
+    three: <SectionThree isCreate={isCreate}/>
+  }
+
   return (
-    <main className={styles.main}>
-      <div className={styles.description}>
-        <p>
-          Get started by editing&nbsp;
-          <code className={styles.code}>src/app/page.tsx</code>
-        </p>
-        <div>
-          <a
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className={styles.vercelLogo}
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
-
-      <div className={styles.center}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
-
-      <div className={styles.grid}>
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Docs <span>-&gt;</span>
-          </h2>
-          <p>Find in-depth information about Next.js features and API.</p>
-        </a>
-
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Learn <span>-&gt;</span>
-          </h2>
-          <p>Learn about Next.js in an interactive course with&nbsp;quizzes!</p>
-        </a>
-
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Templates <span>-&gt;</span>
-          </h2>
-          <p>Explore the Next.js 13 playground.</p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className={styles.card}
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2>
-            Deploy <span>-&gt;</span>
-          </h2>
-          <p>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
+    <main className={styles.mainContainer}>
+      <section className={styles.enterContainer}>
+        {sections[activeSection]}
+      </section>
     </main>
   )
 }
