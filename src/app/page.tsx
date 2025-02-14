@@ -17,7 +17,7 @@ function SectionOne({ setActiveSection }: ISectionOneProps) {
 
   return (
     <>
-      <h2>Mix Poker</h2>
+      <h2>Mix Poker Osvaldo</h2>
       <TextField
         id="outlined-basic"
         label="Digite seu nome"
