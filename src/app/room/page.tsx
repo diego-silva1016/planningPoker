@@ -11,7 +11,7 @@ interface IParticipants {
   [key: string]: number
 }
 
-const fibo = [1, 2, 3, 5, 8, 13, 21, 34]
+const fibo = [0.5, 1, 2, 3, 5, 8, 13, 21, 34]
 
 export default function Room() {
   const [p, setP] = useState<IParticipants>({})
